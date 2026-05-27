@@ -1,6 +1,9 @@
-# 🚀 AI Character Studio — Premium Character Design & Chat Hub
+# 🎭 AI Character Studio — Open-Source AI Character Creator & Roleplay Chat SaaS (Free Character.ai / Replika Alternative)
 
-> **A beautifully designed, fully-integrated AI Character Creator & Chat Studio.** Built with Next.js, this SaaS boilerplate provides a complete, self-contained workspace for generating stunning visual avatar portraits (via MuAPI's image generator engine) and engaging in deep interactive dialogues with custom synthesized character personas.
+> **Create custom AI character portraits and engage in deep roleplay conversations in seconds.** A production-ready, self-hostable Next.js SaaS boilerplate with text-to-avatar generation, image-guided refinement, interactive chat personas, and built-in Stripe billing. A free open-source alternative to Character.ai, Replika, Kindroid, and Joyland AI — powered by the MuAPI AI engine.
+
+**Tech stack:** Next.js 14 (App Router) · Prisma · PostgreSQL · NextAuth (Google OAuth) · Stripe · Tailwind CSS · MuAPI Nano Banana Pro
+**Use cases:** AI companion apps · Character roleplay platforms · Game character design · AI storytelling · Virtual influencer creation · Chatbot personas · Creative writing tools · Interactive fiction
 
 ![AI Character Studio UI](https://cdn.muapi.ai/data/2/592412483657/Screenshot_2026-05-27_201550.png)
 
