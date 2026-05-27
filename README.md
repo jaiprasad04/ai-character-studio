@@ -6,7 +6,7 @@
 
 ## 🌐 Try the Live Engine
 
-**Hosted Demo:** [ai-character-studio.vercel.app](https://ai-character-studio.vercel.app/)
+**Hosted Demo:** [ai-character-studio-beta.vercel.app](https://ai-character-studio-beta.vercel.app/)
 
 Experience the full glassmorphic, responsive interface. Sign in with Google to explore the Studio, customize dropdowns (Aspect Ratio, Output Quality), upload a reference avatar, and preview your high-converting conversational companions directly from your browser.
 
