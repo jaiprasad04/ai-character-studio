@@ -8,20 +8,19 @@ datasource db {
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -35,50 +34,37 @@ model Session {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  name          String?
-  email         String?       @unique
-  emailVerified DateTime?
-  image         String?
-  credits       Int           @default(10)
-  accounts      Account[]
-  sessions      Session[]
-  creations     Creation[]
-  instances     AppInstance[]
+  id                      String                    @id @default(cuid())
+  name                    String?
+  email                   String?                   @unique
+  emailVerified           DateTime?
+  image                   String?
+  credits                 Int                       @default(0)
+  accounts                Account[]
+  sessions                Session[]
+  CharacterStudioCreation CharacterStudioCreation[]
 }
 
-model AppInstance {
-  id          String     @id @default(cuid())
-  name        String
-  templateId  String
-  config      String?    @db.Text // JSON string representation of template-specific configuration parameters
-  createdAt   DateTime   @default(now())
-  
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  creations   Creation[]
-}
-
-model Creation {
+model CharacterStudioCreation {
   id           String   @id @default(cuid())
-  prompt       String?  @db.Text
-  inputImage   String?  @db.Text
-  resultImage  String?  @db.Text
-  aspectRatio  String?
-  resolution   String?
-  creditCost   Int      @default(1)
+  userId       String
+  name         String
+  backstory    String   @db.Text
+  style        String
+  personality  String
+  avatarImage  String?  @db.Text
+  greeting     String?  @db.Text
+  systemPrompt String?  @db.Text
   status       String   @default("processing")
   requestId    String?  @unique
   error        String?  @db.Text
+  creditCost   Int      @default(18)
   createdAt    DateTime @default(now())
-  
-  userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inputImage   String?  @db.Text
+  aspectRatio  String   @default("1:1")
+  resolution   String   @default("1k")
 
-  appId        String?
-  app          AppInstance? @relation(fields: [appId], references: [id], onDelete: Cascade)
-  images_list String?
-  aspect_ratio String?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
