@@ -1,105 +1,157 @@
-# 🚀 AI SaaS Starter — Open-Source Next.js AI SaaS Boilerplate (Free ShipFast / SaaSBoilerplate Alternative)
+# 🎭 AI Character Studio — Open-Source AI Character Creator & Roleplay Chat SaaS (Free Character.ai / Replika Alternative)
 
-> **The production-ready template powering 20+ open-source AI SaaS apps.** Ship a fully functional AI-powered SaaS with Google OAuth, Stripe credit billing, MuAPI AI engine, Prisma, and webhook-backed async generation — in minutes, not weeks. A free open-source alternative to ShipFast, SaaSBoilerplate, Gravity UI, and Bedrock — powered by the MuAPI AI engine.
+> **Create custom AI character portraits and engage in deep roleplay conversations in seconds.** A production-ready, self-hostable Next.js SaaS boilerplate with text-to-avatar generation, image-guided refinement, interactive chat personas, and built-in Stripe billing. A free open-source alternative to Character.ai, Replika, Kindroid, and Joyland AI — powered by the MuAPI AI engine.
 
-**Tech stack:** Next.js 14 (App Router) · Prisma · PostgreSQL · NextAuth (Google OAuth) · Stripe · Tailwind CSS · MuAPI · Webhook-backed async delivery
-**Use cases:** AI image generators · AI video generators · AI audio tools · Virtual try-on apps · AI writing tools · AI photo editors · Any credit-based generative AI SaaS
+**Tech stack:** Next.js 14 (App Router) · Prisma · PostgreSQL · NextAuth (Google OAuth) · Stripe · Tailwind CSS · MuAPI Nano Banana Pro
+**Use cases:** AI companion apps · Character roleplay platforms · Game character design · AI storytelling · Virtual influencer creation · Chatbot personas · Creative writing tools · Interactive fiction
+
+![AI Character Studio UI](https://cdn.muapi.ai/data/2/592412483657/Screenshot_2026-05-27_201550.png)
+
+## 🌐 Try the Live Engine
+
+**Hosted Demo:** [ai-character-studio-beta.vercel.app](https://ai-character-studio-beta.vercel.app/)
+
+Experience the full glassmorphic, responsive interface. Sign in with Google to explore the Studio, customize dropdowns (Aspect Ratio, Output Quality), upload a reference avatar, and preview your high-converting conversational companions directly from your browser.
+
+---
+
+AI Character Studio is not just another wrapper — it's a production-ready, highly-optimized AI web application. Out of the box, it seamlessly manages User Authentication, Credits & Billing, Creations Persistence, and asynchronous AI generation polling using a sleek Next.js (App Router) architecture. It empowers you to build professional-grade AI workflows with built-in mobile optimization, making it the perfect starting point for your next AI SaaS.
+
+**Why use AI Character Studio?**
+
+- **Production-Ready SaaS** — Complete with Google OAuth and Stripe Checkout workflows built-in.
+- **Studio Control Center** — Customize aspect ratio, output quality (1K/2K/4K), and optionally upload a reference avatar image.
+- **Dynamic Dialogue Chat Hub** — Fully integrated interactive chat console letting you converse in real-time with your generated characters.
+- **Direct MuAPI Integration** — Uses `nano-banana-pro` for text-to-image and `nano-banana-pro-edit` for image-guided refinement.
+- **Responsive UX** — Dynamic sliding dropdowns, micro-animations, and complete mobile-stacked responsiveness.
+
+## ✨ Core Features
+
+- **Kinetic Configurator Panel** — Input backstories in an expanding textarea, choose aspect ratio and output quality, and optionally upload a reference avatar photo.
+- **Custom Dropdowns** — Sleek custom selectors featuring Chevron down/up animations, absolute overlays, and `overscroll-contain` wheel scroll-chaining preventions.
+- **Interactive Chat Hub** — Once your character portrait compiles, the dashboard transforms into an active conversational hub linking directly to `/api/chat`.
+- **History Archive** — A persistent gallery with complete modal detail views, copies of system prompts, and dialogue chat interfaces.
+- **Credit Tiers & Billing** — Complete Stripe integration. Deduct **24 credits** per 1K/2K generation and **36 credits** for 4K quality. Route users to price tier panels (Basic, Standard, Pro, Business) to buy bundles.
+
+---
+
+## ⚡ Deployment: Vercel & Production
+
+Deploying an instance of AI Character Studio to the web requires minimal configuration. The architecture is engineered explicitly for **Vercel** serverless environments.
+
+### One-Click Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/SamurAIGPT/ai-character-studio)
+
+> **Pro Tip:** Fork this repository, replace `YOUR_GITHUB_USER` in the link above, to streamline deployments for your private forks.
+
+### 🔑 Required Environment Variables
+
+To successfully deploy and run, you must populate the following environment variables in your Vercel project settings:
+
+| Service               | Variable                             | Description & Source                                                                         |
+| :-------------------- | :----------------------------------- | :------------------------------------------------------------------------------------------- |
+| **Database**          | `DATABASE_URL`                       | PostgreSQL connection string ([Supabase](https://supabase.com) shared pool with pgbouncer)  |
+|                       | `DIRECT_URL`                         | Direct DB connection for Prisma migrations and pushes                                        |
+| **NextAuth / Google** | `NEXTAUTH_SECRET`                    | Secure random string generated via `openssl rand -base64 32`                                 |
+|                       | `NEXTAUTH_URL`                       | Your production domain (e.g. `https://ai-character-studio.vercel.app`)                      |
+|                       | `GOOGLE_CLIENT_ID`                   | Get from [Google Cloud Console](https://console.cloud.google.com/apis/credentials)           |
+|                       | `GOOGLE_CLIENT_SECRET`               | Get from [Google Cloud Console](https://console.cloud.google.com/apis/credentials)           |
+| **Stripe Billing**    | `STRIPE_SECRET_KEY`                  | Get from [Stripe Dashboard](https://dashboard.stripe.com/apikeys)                            |
+|                       | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Get from [Stripe Dashboard](https://dashboard.stripe.com/apikeys)                            |
+|                       | `STRIPE_WEBHOOK_SECRET`              | Webhook secret for resolving credit purchases                                                |
+| **AI Generator**      | `MU_API_KEY`                         | Create an account and get key from [muapi.ai/access-keys](https://muapi.ai/access-keys)      |
+|                       | `WEBHOOK_URL`                        | Callback URL for receiving slow-running generation events                                    |
+
+---
+
+## 🛠️ Local Development
+
+Ready to iterate locally? Setup is straightforward.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/en/) (v18 or higher)
+- A local PostgreSQL instance or a free cloud Database URL.
+
+### Setup
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/SamurAIGPT/ai-character-studio
+cd ai-character-studio
+
+# 2. Install dependencies
+npm install
+
+# 3. Setup Environment
+cp .env.example .env
+# Open .env and insert your specific keys. You can use a local DB or your dev cloud DB.
+
+# 4. Initialize Database Schema
+npx prisma generate
+npx prisma db push
+
+# 5. Start the Development Server
+npm run dev
+```
+
+The graphical console should now be heavily responsive on `http://localhost:3000`.
+
+---
+
+## 🗄️ Database Setup (Prisma Introspection Cycle)
+
+> ⚠️ **Database Safety Warning**: This application shares a single PostgreSQL database instance on Supabase with other applications in this workspace. Follow the cycle below to synchronize models safely:
+>
+> 1. **Pull all existing tables**: `npx prisma db pull` (introspects all active tables)
+> 2. **Declare relation changes**: Inject the `CharacterStudioCreation` model in your local `schema.prisma` and link it inside the `User` model.
+> 3. **Push to database**: Run `npx prisma db push` to merge changes safely.
+> 4. **Local Schema Cleanup**: Strip away other applications' models from your local `schema.prisma`, leaving only `Account`, `Session`, `User`, `VerificationToken`, and `CharacterStudioCreation`.
+> 5. **Compile local client**: Run `npx prisma generate` to build your local Prisma client.
 
 ---
 
 ## 🏗️ Technical Architecture
-* **Frontend**: Next.js 16 (App Router) + React 19 + Tailwind CSS v4 + React Icons
-* **Database**: Supabase Shared PostgreSQL pool + Prisma Client
-* **Auth**: NextAuth with Google OAuth Provider
-* **Billing**: Stripe Checkout (prebuilt webhook configuration for credit additions)
-* **Prediction Engine**: Universal async trigger, inline client polling, and webhook prediction completion sync
+
+This application decouples visually rich UI elements from core business logic layers, emphasizing modularization.
+
+```
+ai-character-studio/
+├── prisma/
+│   └── schema.prisma           # Postgres tables: Users, Accounts, CharacterStudioCreations
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── api/                # Backend API Routes (Stripe, MuAPI LLM/Images, Auth)
+│   │   │   ├── auth/           # NextAuth catch-all routes
+│   │   │   ├── billing/        # Stripe Checkout session builders and webhook listeners
+│   │   │   ├── chat/           # Live character conversational dialogue route
+│   │   │   └── creations/      # Creations database fetch and POST polling endpoints
+│   │   ├── gallery/            # Detailed css grid completed characters gallery
+│   │   ├── pricing/            # Interactive packaging tier checkout selection page
+│   │   ├── layout.js           # Head assets and metadata
+│   │   ├── globals.css         # Styling system theme and gradients
+│   │   └── page.js             # Main Studio generation and companion chat interface
+│   ├── components/
+│   │   ├── Navbar.jsx          # Collapsible responsive navigation component
+│   │   ├── CustomToggle.jsx    # Custom sliding toggle pill switch
+│   │   └── CustomSelect.jsx    # Sleek custom dropdown options select card
+│   └── lib/
+│       ├── prisma.js           # Shared ORM client singleton
+│       ├── auth.js             # Google OAuth callback options
+│       ├── config.js           # Platform metadata and price tiers
+│       └── services/
+│           ├── user.js         # Credit adjustment database hooks
+│           ├── billing.js      # Stripe construction services
+│           └── ai.js           # MuAPI predictions submissions and fallback mocks
+├── next.config.mjs             # Next Configuration
+├── package.json
+```
+
+## 📄 License
+
+MIT Licensed.
 
 ---
 
-## 📁 Key Features
-* **Google Auth & Session Management**: Secure user registration, sign-in state checks, and session persistence.
-* **Credit Checkout System**: Dynamic checkout redirection, transaction safety metadata, and automated webhook credit topups.
-* **Prediction Webhook Webhooks**: Two-tiered delivery (inline polling for short tasks, and webhook handler for longer predictions).
-* **Local Webhook Bypass Pattern**: Automatically polls active generations on creations load (`/api/creations`) to heal state if webhooks fail in local development.
-* **Premium Theme (Dark Mode)**: Fully responsive dark-themed workspace with sliding aspect ratio presets, pulsing badges, and guest warning banners.
-* **CORS-Safe Downloads**: Server proxy `/api/download` to bypass cross-origin browser behaviors and download images immediately.
-
----
-
-## 🗄️ Database Safety Warning (Supabase Shared DB)
-
-This application shares a single PostgreSQL database instance with other SaaS tools. **To prevent deleting tables of other applications in the shared pool, you MUST follow the schema synchronization lifecycle:**
-
-1. **Pull first (Introspection)**: Run `npx prisma db pull` to load all database tables into your local `schema.prisma`.
-2. **Declare your model**: Write your application's custom tables (e.g. `Creation`, `Enhancement`) and links inside the `User` model.
-3. **Push changes**: Run `npx prisma db push`. This adds your models safely without dropping existing ones.
-4. **Cleanup schema**: Strip models of other apps out of your `schema.prisma` file so your compiled types remain clean and lightweight.
-5. **Generate client**: Run `npx prisma generate` to rebuild the type-safe client.
-
----
-
-## 🔑 Environment Variables
-Create a `.env` file in the root directory (based on `.env.example`):
-* `DATABASE_URL`: Connection URL of Supabase PostgreSQL database.
-* `DIRECT_URL`: Connection URL for database migrations.
-* `NEXTAUTH_SECRET`: Random string for encrypting NextAuth sessions.
-* `NEXTAUTH_URL`: Canonical root URL of the deployment (e.g. `http://localhost:3000`).
-* `GOOGLE_CLIENT_ID`: OAuth Client ID from Google Cloud Console.
-* `GOOGLE_CLIENT_SECRET`: OAuth Client Secret from Google Cloud Console.
-* `MUAPIAPP_API_KEY`: API Key to connect to the MUAPI services.
-* `WEBHOOK_URL`: Target webhook domain (usually maps to `NEXTAUTH_URL`).
-* `STRIPE_SECRET_KEY`: Private key from Stripe dashboard.
-* `STRIPE_WEBHOOK_SECRET`: Signature key to verify Stripe checkout events.
-* `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Public Stripe key.
-
----
-
-## 🚀 Local Setup & Installation
-
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Dynamic DB sync (Follow the Database Safety lifecycle above):
-   ```bash
-   npx prisma db pull
-   npx prisma generate
-   ```
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
-4. Build for production:
-   ```bash
-   npm run build
-   ```
-
----
-
-## 🛠️ How to Launch a Custom SaaS App with Dynamic Parameter Uploads
-
-This Next.js SaaS platform includes a parameter designer that allows you to configure dynamic image, video, and audio uploads with strict input count limits.
-
-### 1. Define App Custom Parameters (JSON Schema)
-Click **Launch New App** on the main dashboard and paste a JSON template containing your prompt parameters. The system automatically inspects both keys and values to map them to appropriate form fields:
-* **Image Upload Fields**: Keys containing `image` or `img` (or string values ending in `.jpg`, `.png`, `.webp`, `.gif`) auto-detect as **Image Upload** (`image_list`).
-* **Video Upload Fields**: Keys containing `video` (or string values ending in `.mp4`, `.webm`, `.mov`) auto-detect as **Video Upload** (`video_list`).
-* **Audio Upload Fields**: Keys containing `audio` (or string values ending in `.mp3`, `.wav`, `.m4a`) auto-detect as **Audio Upload** (`audio_list`).
-* **Dropdowns (`enum`)**: String values with commas or matching common presets (e.g. `Auto`, `1k`, `2k`, `4k`) map to selections.
-* **Toggles (`boolean`)**: Boolean values map to toggle switches.
-* **Others**: Numbers map to number fields; text values with newlines (`\n`) map to textareas.
-
-### 2. Auto-Detected Input Limits & Configuration
-When an upload type is parsed, the parameter designer manages lists and limits automatically:
-* **Single vs. List Key Detection**: If a key contains `_list` (e.g., `images_list`) or the default JSON value is an array, the system sets the default **Max Uploads Limit** to **`5`**. Otherwise, single-upload parameters (e.g. `image_url`) default to **`1`**.
-* **Limit Range Adjustment**: You can dynamically modify the limits per-parameter using the **Max Uploads Limit** configuration input/slider (ranging from **1 to 10**) directly in the Launch Modal.
-
-### 3. Execution & Studio Rendering
-Upon launching the application, the dedicated studio route is created:
-1. **Dynamic File Dropzones**: The studio sidebar renders clean, custom file upload dashed blocks (supporting icons for images, videos, and audios).
-2. **Preview Grid & Deletion**: Uploaded items render in a responsive square preview grid with individual delete controls (`✕`).
-3. **Limit Enforcement**: The sidebar restricts uploading more files once the configured limit (`maxInputs`) is reached.
-4. **Data Packaging**: When generating output:
-   * Single inputs (`maxInputs === 1`) are packaged as a single string URL value (e.g. `"https://cdn.muapi.com/file.png"`).
-   * List inputs (`maxInputs > 1`) are packaged as an array of string URLs.
-   * Standalone generated database compiler strings automatically stringify array parameters to ensure safe Prisma serialization in the background.
+_AI Character Studio: A modular, mobile-ready, production-grade AI character creation and dialogue engine built for creators and builders._
