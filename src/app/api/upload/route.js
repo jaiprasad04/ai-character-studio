@@ -3,42 +3,42 @@ import config from "@/lib/config";
 
 export async function POST(req) {
   try {
-    const data = await req.formData();
-    const file = data.get("file");
-    if (!file) {
-      return new NextResponse("No file uploaded", { status: 400 });
-    }
+    const formData = await req.formData();
+    const file = formData.get("file");
     const apiKey = config.ai.apiKey;
 
-    if (!apiKey || apiKey.includes("your_") || apiKey.trim() === "") {
-      // Local Base64 Fallback
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      return NextResponse.json({ url: `data:${file.type};base64,${buffer.toString("base64")}` });
+    if (!file) {
+      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    const fd = new FormData();
-    fd.append("file", file);
+    if (!apiKey || apiKey.includes("your_") || apiKey.trim() === "") {
+      // Offline/Local Base64 Fallback
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const base64Url = `data:${file.type};base64,${buffer.toString("base64")}`;
+      return NextResponse.json({ url: base64Url });
+    }
+
+    const uploadFormData = new FormData();
+    uploadFormData.append("file", file);
 
     const uploadRes = await fetch("https://api.muapi.ai/api/v1/upload_file", {
       method: "POST",
-      headers: { "x-api-key": apiKey },
-      body: fd
+      headers: {
+        "x-api-key": apiKey,
+      },
+      body: uploadFormData,
     });
 
     if (!uploadRes.ok) {
-      const errText = await uploadRes.text();
-      console.error("MuAPI upload failed:", uploadRes.status, errText);
-      // Fall back to base64 in case of upload failure
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      return NextResponse.json({ url: `data:${file.type};base64,${buffer.toString("base64")}` });
+      const errorText = await uploadRes.text();
+      return NextResponse.json({ error: `CDN upload failed: ${errorText}` }, { status: 500 });
     }
 
     const result = await uploadRes.json();
     return NextResponse.json({ url: result.url || result.file_url });
   } catch (error) {
-    console.error("[UPLOAD_ERROR]", error);
-    return new NextResponse("Upload Error", { status: 500 });
+    console.error("File upload error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

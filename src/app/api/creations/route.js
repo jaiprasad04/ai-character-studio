@@ -3,90 +3,46 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AIService } from "@/lib/services/ai";
-import config from "@/lib/config";
 
-// GET — list creations or poll a specific requestId
 export async function GET(req) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) return new NextResponse("Unauthorized", { status: 401 });
-
-    const { searchParams } = new URL(req.url);
-    const requestId = searchParams.get("requestId");
-
-    if (requestId) {
-      const statusData = await AIService.checkStatus(requestId);
-      return NextResponse.json(statusData);
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const creations = await prisma.characterStudioCreation.findMany({
-      where: { userId: session.user.id },
+    const { searchParams } = new URL(req.url);
+    const appId = searchParams.get("appId");
+    const userId = session.user.id;
+
+    // Filter by appId if provided
+    const queryConditions = { userId };
+    if (appId) {
+      queryConditions.appId = appId;
+    }
+
+    // 1. Fetch user's creations
+    const creations = await prisma.creation.findMany({
+      where: queryConditions,
+      include: {
+        app: true,
+      },
       orderBy: { createdAt: "desc" },
     });
 
-    // Self-healing: sync any still-processing items on the fly
-    const updated = await Promise.all(
-      creations.map(async (c) => {
-        if (c.status === "processing" && c.requestId) {
-          try {
-            await AIService.checkStatus(c.requestId);
-            return (
-              (await prisma.characterStudioCreation.findUnique({
-                where: { id: c.id },
-              })) || c
-            );
-          } catch {
-            return c;
-          }
+    // 2. Scan for and sync active "processing" tasks
+    const syncedCreations = await Promise.all(
+      creations.map(async (creation) => {
+        if (creation.status === "processing") {
+          return await AIService.syncStatus(creation.id);
         }
-        return c;
+        return creation;
       })
     );
 
-    return NextResponse.json(updated);
+    return NextResponse.json(syncedCreations);
   } catch (error) {
-    console.error("[CREATIONS_GET_ERROR]", error);
-    return new NextResponse("Internal Error", { status: 500 });
-  }
-}
-
-// POST — submit a new character generation
-export async function POST(req) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) return new NextResponse("Unauthorized", { status: 401 });
-
-    const { prompt, aspectRatio = "1:1", resolution = "1k", inputImage = null } = await req.json();
-
-    if (!prompt || prompt.trim() === "") {
-      return new NextResponse("Prompt description is required", { status: 400 });
-    }
-
-    // Dynamic cost logic: 24 credits for 1k/2k, 36 credits for 4k
-    const cost = resolution === "4k" ? 36 : 24;
-
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { credits: true },
-    });
-
-    if (!user || user.credits < cost) {
-      return new NextResponse(
-        `Insufficient credits. Required: ${cost}, balance: ${user?.credits ?? 0}`,
-        { status: 400 }
-      );
-    }
-
-    const creation = await AIService.generateCharacter(session.user.id, {
-      prompt,
-      aspectRatio,
-      resolution,
-      inputImage,
-    });
-
-    return NextResponse.json(creation);
-  } catch (error) {
-    console.error("[CREATIONS_POST_ERROR]", error);
-    return new NextResponse(error.message || "Internal Error", { status: 500 });
+    console.error("Creations GET handler error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
