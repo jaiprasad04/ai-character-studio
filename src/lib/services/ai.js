@@ -27,12 +27,13 @@ export const AIService = {
           status: "completed",
           resultImage: inputImage || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
           creditCost: cost,
-          aspectRatio,
-        appId,
-          prompt: customParams.prompt !== undefined ? String(customParams.prompt) : "",
-          images_list: customParams.images_list !== undefined ? (Array.isArray(customParams.images_list) ? JSON.stringify(customParams.images_list) : String(customParams.images_list)) : "[]",
-          aspect_ratio: customParams.aspect_ratio !== undefined ? String(customParams.aspect_ratio) : "",
-          resolution: customParams.resolution !== undefined ? String(customParams.resolution) : "1k"
+          aspectRatio: aspectRatio || "1:1",
+          appId,
+          resolution: customParams.resolution !== undefined ? String(customParams.resolution) : "1k",
+          customData: JSON.stringify({
+            images_list: customParams.images_list || [],
+            aspect_ratio: customParams.aspect_ratio || aspectRatio || "1:1",
+          })
         }
       });
       return { id: creation.id, resultImage: creation.resultImage, status: "completed" };
@@ -75,11 +76,15 @@ export const AIService = {
         ...customParams,
       };
     } else {
+      const finalCustomParams = { ...customParams };
+      if (!finalCustomParams.aspect_ratio) {
+        finalCustomParams.aspect_ratio = aspectRatio || "1:1";
+      }
       bodyPayload = {
         prompt,
         images_list: inputImage ? [inputImage] : [],
         aspect_ratio: aspectRatio || "1:1",
-        ...customParams,
+        ...finalCustomParams,
         webhook: webhookUrl,
       };
     }
@@ -120,12 +125,13 @@ export const AIService = {
         requestId,
         status: "processing",
         creditCost: cost,
-        aspectRatio,
+        aspectRatio: aspectRatio || "1:1",
         appId,
-          prompt: customParams.prompt !== undefined ? String(customParams.prompt) : "",
-          images_list: customParams.images_list !== undefined ? (Array.isArray(customParams.images_list) ? JSON.stringify(customParams.images_list) : String(customParams.images_list)) : "[]",
-          aspect_ratio: customParams.aspect_ratio !== undefined ? String(customParams.aspect_ratio) : "",
-          resolution: customParams.resolution !== undefined ? String(customParams.resolution) : "1k"
+        resolution: customParams.resolution !== undefined ? String(customParams.resolution) : "1k",
+        customData: JSON.stringify({
+          images_list: customParams.images_list || [],
+          aspect_ratio: customParams.aspect_ratio || aspectRatio || "1:1",
+        })
       }
     });
 
