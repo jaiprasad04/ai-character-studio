@@ -16,15 +16,28 @@ export default function StandaloneWorkspace() {
   const [creations, setCreations] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchAppData = async () => {
+  const fetchAppData = async (immediateActiveCreation = null) => {
     try {
       const { data: userCreations } = await axios.get(`/api/creations?appId=${standaloneConfig.appId}`);
       setCreations(userCreations || []);
 
-      if (userCreations && userCreations.length > 0) {
-        const processing = userCreations.find(c => c.status === "processing");
-        setActiveCreation(processing || userCreations[0]);
-      }
+      setActiveCreation((prevActive) => {
+        if (immediateActiveCreation) {
+          return userCreations.find(c => c.id === immediateActiveCreation.id) || immediateActiveCreation;
+        }
+        if (userCreations && userCreations.length > 0) {
+          const processing = userCreations.find(c => c.status === "processing");
+          if (processing) {
+            return processing;
+          }
+          if (prevActive) {
+            const updated = userCreations.find(c => c.id === prevActive.id);
+            if (updated) return updated;
+          }
+          return userCreations[0];
+        }
+        return null;
+      });
     } catch (err) {
       console.error("Error loading creations:", err);
       toast.error("Failed to load workspace data.");

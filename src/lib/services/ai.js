@@ -228,6 +228,13 @@ export const AIService = {
             include: { app: true }
           });
         }
+      } else if (response.status === 404) {
+        // Request not found or expired upstream, mark as failed so it does not hijack activeCreation
+        return await prisma.creation.update({
+          where: { id: creationId },
+          data: { status: "failed", error: "Request expired or not found upstream" },
+          include: { app: true }
+        });
       }
     } catch (e) {
       console.error(`Error syncing creation state ${creationId}:`, e);

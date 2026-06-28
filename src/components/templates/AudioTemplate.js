@@ -210,8 +210,10 @@ export default function AudioTemplate({ appInstance, userCredits, activeCreation
 
       if (data.status === "failed") {
         toast.error("Transcription failed. Credits refunded.", { id: toastId });
-      } else {
+      } else if (data.status === "completed") {
         toast.success("Transcription complete!", { id: toastId });
+      } else {
+        toast.success("Transcription started! Polling status...", { id: toastId });
       }
       onCreationCompleted();
     } catch (err) {

@@ -225,8 +225,10 @@ export default function VideoTemplate({ appInstance, userCredits, activeCreation
 
       if (data.status === "failed") {
         toast.error("Video generation failed. Credits refunded.", { id: toastId });
-      } else {
+      } else if (data.status === "completed") {
         toast.success("Video generation completed!", { id: toastId });
+      } else {
+        toast.success("Video generation started! Polling status...", { id: toastId });
       }
       onCreationCompleted();
     } catch (err) {

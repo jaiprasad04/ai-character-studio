@@ -225,10 +225,12 @@ export default function ImageTemplate({ appInstance, userCredits, activeCreation
 
       if (data.status === "failed") {
         toast.error("Generation failed. Credits refunded.", { id: toastId });
-      } else {
+      } else if (data.status === "completed") {
         toast.success("Generation completed!", { id: toastId });
+      } else {
+        toast.success("Generation started! Polling status...", { id: toastId });
       }
-      onCreationCompleted();
+      onCreationCompleted(data);
     } catch (err) {
       toast.error(err.response?.data?.error || "Generation failed.", { id: toastId });
     } finally {
