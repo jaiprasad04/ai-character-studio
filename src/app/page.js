@@ -34,7 +34,6 @@ export default function StandaloneWorkspace() {
             const updated = userCreations.find(c => c.id === prevActive.id);
             if (updated) return updated;
           }
-          return userCreations[0];
         }
         return null;
       });
