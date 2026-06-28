@@ -54,7 +54,7 @@ function CustomSelect({ value, onChange, options, placeholder = "Select option",
   );
 }
 
-export default function ImageTemplate({ appInstance, userCredits, activeCreation, onCreationCompleted }) {
+export default function ImageTemplate({ appInstance, userCredits, activeCreation, onCreationCompleted, generating: propGenerating, setGenerating: propSetGenerating }) {
   const parsedConfig = appInstance.config ? JSON.parse(appInstance.config) : {};
   const userParams = parsedConfig.userParams || [];
 
@@ -62,7 +62,9 @@ export default function ImageTemplate({ appInstance, userCredits, activeCreation
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [aspectRatio, setAspectRatio] = useState(parsedConfig.aspectRatio || "1:1");
-  const [generating, setGenerating] = useState(false);
+  const [localGenerating, setLocalGenerating] = useState(false);
+  const generating = propGenerating !== undefined ? propGenerating : localGenerating;
+  const setGenerating = propSetGenerating !== undefined ? propSetGenerating : setLocalGenerating;
   const [beforeAfterSlider, setBeforeAfterSlider] = useState(50);
 
   // Dynamic Parameter State
@@ -509,7 +511,16 @@ export default function ImageTemplate({ appInstance, userCredits, activeCreation
 
       {/* Output Panel / Workspace */}
       <div className="flex-1 border border-divider/30 bg-bg-card/10 rounded-lg p-6 flex flex-col items-center justify-center min-h-[400px]">
-        {activeCreation ? (
+        {generating || (activeCreation && activeCreation.status === "processing") ? (
+          <div className="w-full max-w-lg space-y-6">
+            <div className="relative h-96 w-full rounded overflow-hidden bg-bg-page border border-divider shadow-xl flex items-center justify-center">
+              <div className="flex flex-col items-center gap-4 text-xs font-semibold text-secondary-text">
+                <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <span className="animate-pulse">MuAPI processing image...</span>
+              </div>
+            </div>
+          </div>
+        ) : activeCreation ? (
           <div className="w-full max-w-lg space-y-6">
             {activeCreation.inputImage && activeCreation.resultImage && activeCreation.status === "completed" ? (
               <div className="relative h-96 w-full rounded overflow-hidden shadow-2xl">
@@ -536,12 +547,7 @@ export default function ImageTemplate({ appInstance, userCredits, activeCreation
               </div>
             ) : (
               <div className="relative h-96 w-full rounded overflow-hidden bg-bg-page border border-divider shadow-xl flex items-center justify-center">
-                {activeCreation.status === "processing" ? (
-                  <div className="flex flex-col items-center gap-4 text-xs font-semibold text-secondary-text">
-                    <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    <span className="animate-pulse">MuAPI processing image...</span>
-                  </div>
-                ) : activeCreation.status === "completed" ? (
+                {activeCreation.status === "completed" ? (
                   <img src={activeCreation.resultImage} alt="AI output" className="w-full h-full object-contain" />
                 ) : (
                   <div className="flex flex-col items-center gap-2 text-xs text-red-500 font-bold">

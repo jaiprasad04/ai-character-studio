@@ -55,7 +55,7 @@ function CustomSelect({ value, onChange, options, placeholder = "Select option",
   );
 }
 
-export default function VideoTemplate({ appInstance, userCredits, activeCreation, onCreationCompleted }) {
+export default function VideoTemplate({ appInstance, userCredits, activeCreation, onCreationCompleted, generating: propGenerating, setGenerating: propSetGenerating }) {
   const parsedConfig = appInstance.config ? JSON.parse(appInstance.config) : {};
   const userParams = parsedConfig.userParams || [];
 
@@ -63,7 +63,9 @@ export default function VideoTemplate({ appInstance, userCredits, activeCreation
   const [sourceImage, setSourceImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [duration, setDuration] = useState(5);
-  const [generating, setGenerating] = useState(false);
+  const [localGenerating, setLocalGenerating] = useState(false);
+  const generating = propGenerating !== undefined ? propGenerating : localGenerating;
+  const setGenerating = propSetGenerating !== undefined ? propSetGenerating : setLocalGenerating;
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Dynamic Parameter State
@@ -230,7 +232,7 @@ export default function VideoTemplate({ appInstance, userCredits, activeCreation
       } else {
         toast.success("Video generation started! Polling status...", { id: toastId });
       }
-      onCreationCompleted();
+      onCreationCompleted(data);
     } catch (err) {
       toast.error(err.response?.data?.error || "Generation failed.", { id: toastId });
     } finally {
@@ -545,18 +547,19 @@ export default function VideoTemplate({ appInstance, userCredits, activeCreation
 
       {/* Output Panel / Video Preview */}
       <div className="flex-1 border border-divider/30 bg-bg-card/10 rounded-lg p-6 flex flex-col items-center justify-center min-h-[400px]">
-        {activeCreation ? (
+        {generating || (activeCreation && activeCreation.status === "processing") ? (
+          <div className="w-full max-w-lg space-y-6">
+            <div className="relative w-full rounded overflow-hidden bg-bg-page border border-divider shadow-xl flex items-center justify-center" style={{ aspectRatio: "16/9" }}>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-xs font-semibold text-secondary-text">
+                <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <span className="animate-pulse">Rendering video frames...</span>
+              </div>
+            </div>
+          </div>
+        ) : activeCreation ? (
           <div className="w-full max-w-lg space-y-6">
             <div className="relative w-full rounded overflow-hidden bg-bg-page border border-divider shadow-xl" style={{ aspectRatio: "16/9" }}>
-              {activeCreation.status === "processing" ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-xs font-semibold text-secondary-text">
-                  <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <span className="animate-pulse">Rendering video frames...</span>
-                  <div className="w-48 h-1.5 bg-bg-card rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full animate-[progress_3s_ease-in-out_infinite]" style={{ width: "60%" }} />
-                  </div>
-                </div>
-              ) : activeCreation.status === "completed" ? (
+              {activeCreation.status === "completed" ? (
                 isVideoOutput(activeCreation.resultImage) ? (
                   <div className="relative w-full h-full group">
                     <video

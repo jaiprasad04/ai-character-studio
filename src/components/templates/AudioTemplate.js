@@ -48,13 +48,15 @@ function CustomSelect({ value, onChange, options, placeholder = "Select option",
   );
 }
 
-export default function AudioTemplate({ appInstance, userCredits, activeCreation, onCreationCompleted }) {
+export default function AudioTemplate({ appInstance, userCredits, activeCreation, onCreationCompleted, generating: propGenerating, setGenerating: propSetGenerating }) {
   const parsedConfig = appInstance.config ? JSON.parse(appInstance.config) : {};
   const userParams = parsedConfig.userParams || [];
 
   const [audioUrl, setAudioUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const [localGenerating, setLocalGenerating] = useState(false);
+  const generating = propGenerating !== undefined ? propGenerating : localGenerating;
+  const setGenerating = propSetGenerating !== undefined ? propSetGenerating : setLocalGenerating;
 
   // Dynamic Parameter State
   const [customValues, setCustomValues] = useState(() => {
@@ -215,7 +217,7 @@ export default function AudioTemplate({ appInstance, userCredits, activeCreation
       } else {
         toast.success("Transcription started! Polling status...", { id: toastId });
       }
-      onCreationCompleted();
+      onCreationCompleted(data);
     } catch (err) {
       toast.error(err.response?.data?.error || "Transcription failed.", { id: toastId });
     } finally {
@@ -470,13 +472,13 @@ export default function AudioTemplate({ appInstance, userCredits, activeCreation
           </div>
 
           <div className="flex-1 bg-bg-page border border-divider/40 rounded p-4 text-xs leading-relaxed overflow-y-auto scrollbar-subtle min-h-[250px] max-h-[350px] overscroll-contain">
-            {activeCreation ? (
-              activeCreation.status === "processing" ? (
-                <div className="h-full flex flex-col items-center justify-center gap-3 text-secondary-text font-bold uppercase tracking-wider">
-                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <span className="animate-pulse">Whisper processing transcription...</span>
-                </div>
-              ) : activeCreation.status === "completed" ? (
+            {generating || (activeCreation && activeCreation.status === "processing") ? (
+              <div className="h-full flex flex-col items-center justify-center gap-3 text-secondary-text font-bold uppercase tracking-wider">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <span className="animate-pulse">Whisper processing transcription...</span>
+              </div>
+            ) : activeCreation ? (
+              activeCreation.status === "completed" ? (
                 <p className="font-medium whitespace-pre-wrap">{activeCreation.resultImage || "Done."}</p>
               ) : (
                 <span className="text-red-500 font-bold">Transcription failed: {activeCreation.error || "MuAPI error."}</span>

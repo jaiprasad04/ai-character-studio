@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -15,8 +15,59 @@ export default function StandaloneWorkspace() {
   const [activeCreation, setActiveCreation] = useState(null);
   const [creations, setCreations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const fetchingRef = useRef(false);
+  const pollingActiveRef = useRef(false);
+
+  const pollCreationStatus = async (creationId) => {
+    if (pollingActiveRef.current) return;
+    pollingActiveRef.current = true;
+    try {
+      const { data: userCreations } = await axios.get(`/api/creations?appId=${standaloneConfig.appId}`);
+      setCreations(userCreations || []);
+
+      const current = userCreations.find(c => c.id === creationId);
+      if (!current) {
+        setGenerating(false);
+        pollingActiveRef.current = false;
+        return;
+      }
+
+      if (current.status === "completed" || current.status === "failed") {
+        setActiveCreation(current);
+        setGenerating(false);
+        pollingActiveRef.current = false;
+      } else {
+        pollingActiveRef.current = false;
+        setTimeout(() => pollCreationStatus(creationId), 3000);
+      }
+    } catch (err) {
+      console.error("Polling error:", err);
+      setGenerating(false);
+      pollingActiveRef.current = false;
+    }
+  };
+
+  const handleCreationCompleted = (data) => {
+    if (!data) {
+      fetchAppData();
+      return;
+    }
+
+    if (data.status === "completed" || data.status === "failed") {
+      setActiveCreation(data);
+      setGenerating(false);
+      fetchAppData(); // Sync creations list
+    } else if (data.status === "processing") {
+      setActiveCreation(data);
+      setGenerating(true);
+      pollCreationStatus(data.id);
+    }
+  };
 
   const fetchAppData = async (immediateActiveCreation = null) => {
+    if (fetchingRef.current && !immediateActiveCreation) return;
+    fetchingRef.current = true;
     try {
       const { data: userCreations } = await axios.get(`/api/creations?appId=${standaloneConfig.appId}`);
       setCreations(userCreations || []);
@@ -28,6 +79,8 @@ export default function StandaloneWorkspace() {
         if (userCreations && userCreations.length > 0) {
           const processing = userCreations.find(c => c.status === "processing");
           if (processing) {
+            setGenerating(true);
+            pollCreationStatus(processing.id);
             return processing;
           }
           if (prevActive) {
@@ -41,6 +94,7 @@ export default function StandaloneWorkspace() {
       console.error("Error loading creations:", err);
       toast.error("Failed to load workspace data.");
     } finally {
+      fetchingRef.current = false;
       setLoading(false);
     }
   };
@@ -48,17 +102,6 @@ export default function StandaloneWorkspace() {
   useEffect(() => {
     fetchAppData();
   }, []);
-
-  useEffect(() => {
-    const hasProcessing = creations.some((c) => c.status === "processing");
-    if (!hasProcessing) return;
-
-    const interval = setInterval(() => {
-      fetchAppData();
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [creations]);
 
   if (loading) {
     return (
@@ -104,7 +147,9 @@ export default function StandaloneWorkspace() {
             <TemplateComponent
               appInstance={appInstance}
               activeCreation={activeCreation}
-              onCreationCompleted={fetchAppData}
+              generating={generating}
+              setGenerating={setGenerating}
+              onCreationCompleted={handleCreationCompleted}
             />
           ) : (
             <div className="text-xs text-red-500 font-bold">
