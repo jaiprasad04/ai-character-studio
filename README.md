@@ -15,9 +15,9 @@
 
 > 🎨 **[Explore 50+ more open-source AI apps →](https://github.com/Anil-matcha/awesome-generative-ai-apps)**
 
-<p align="center">
-  <video src="https://cdn.muapi.ai/github-videos/ai-character-studio.mp4" width="100%" controls autoplay loop muted></video>
-</p>
+[![Watch the AI Character Studio Demo Video](https://cdn.muapi.ai/data/2/592412483657/Screenshot_2026-05-27_201550.png)](https://cdn.muapi.ai/github-videos/ai-character-studio.mp4)
+
+*🎬 Click the image above to watch the interactive demo video.*
 
 ## 🌐 Try the Live Engine
 
